@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimal-ui">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#00ff00">
+        <link rel="manifest" href="/iii6666_333/manifest.json">
+        <link rel="apple-touch-icon" href="/iii6666_333/icons/mm1.png">
+        <link rel="icon" type="image/png" sizes="192x192" href="/iii6666_333/icons/mm1.png">
+        <link rel="icon" type="image/png" sizes="512x512" href="/iii6666_333/icons/mm2.png">
+        <title>AI算牌系統</title>
+    <style>
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 60px;
+            text-align: center;
+        }
+
+        .button {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .blue { 
+            background-color: rgba(74, 144, 226, 0.8);
+            border: 1px solid #4a90e2;
+        }
+        .red { 
+            background-color: rgba(231, 76, 60, 0.8);
+            border: 1px solid #e74c3c;
+        }
+        .green { 
+            background-color: rgba(46, 204, 113, 0.8);
+            border: 1px solid #2ecc71;
+        }
+
+        #stats {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            margin: 15px 0;
+            font-size: 14px;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        #prediction {
+            line-height: 1.5;
+            font-size: 16px;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        #reset, #delete {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 5px;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        #reset {
+            background-color: rgba(52, 73, 94, 0.8);
+            border: 1px solid #34495e;
+        }
+
+        #reset:hover {
+            background-color: rgba(44, 62, 80, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+
+        #delete {
+            background-color: rgba(255, 107, 107, 0.8);
+            border: 1px solid #ff6b6b;
+        }
+
+        #delete:hover {
+            background-color: rgba(255, 82, 82, 0.8);
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.3);
+        }
+
+        #history-display {
+            background-color: rgba(0, 0, 0, 0.7);
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            display: grid;
+            grid-template-columns: repeat(10, auto);
+            grid-template-rows: repeat(6, auto);
+            gap: 4px;
+            justify-content: center;
+            border: 1px solid #00ff00;
+        }
+
+        .history-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0;
+            transition: transform 0.2s;
+        }
+
+        .history-cell {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff00;
+            border-radius: 50%;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 24px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        @media screen and (max-width: 480px) {
+            .button {
+                width: 60px;
+                height: 60px;
+                font-size: 14px;
+                margin: 3px;
+            }
+
+            #delete, #reset {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            #stats {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .history-dot, .history-cell {
+                width: 15px;
+                height: 15px;
+            }
+        }
+
+        @media screen and (max-width: 320px) {
+            .button {
+                width: 50px;
+                height: 50px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <h1>AI算牌系統</h1>
+    <div class="container">
+        <div class="button-group">
+            <button class="button blue" onclick="selectColor('blue')">閒</button>
+            <button class="button red" onclick="selectColor('red')">莊</button>
+            <button class="button green" onclick="selectColor('green')">和</button>
+        </div>
+        <div class="button-group">
+            <button id="delete" onclick="deleteLastRecord()">刪除上一步</button>
+            <button id="reset" onclick="resetGame()">重置遊戲</button>
+        </div>
+        <div id="stats">
+            <p>已進行回合: <span id="rounds">0</span>/60</p>
+            <p>系統建議:</p>
+            <p><span id="prediction"></span></p>
+        </div>
+
+        <div>
+            <p>歷史紀錄：</p>
+            <div id="history-display"></div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲邏輯
+        let history = [];
+        let rounds = 0;
+        const MAX_ROUNDS = 60;
+
+        // 蒙地卡羅模擬函數
+        function monteCarloSimulation(history, simulations = 10000) {
+            const results = {
+                blue: 0,
+                red: 0,
+                green: 0
+            };
+            
+            // 基礎機率
+            const baseProb = {
+                blue: 0.445,    // 閒家基礎機率 44.5%
+                red: 0.456,     // 莊家基礎機率 45.6%
+                green: 0.099    // 和局基礎機率 9.9%
+            };
+
+            // 分析歷史數據的趨勢
+            const recentGames = history.slice(-6);
+            const streakAnalysis = analyzeStreak(history);
+            
+            // 進行蒙地卡羅模擬
+            for (let i = 0; i < simulations; i++) {
+                let adjustedProb = {...baseProb};
+                
+                // 根據連續出現的情況調整機率
+                if (streakAnalysis.streak >= 3) {
+                    const oppositeSide = streakAnalysis.color === 'red' ? 'blue' : 'red';
+                    adjustedProb[oppositeSide] += 0.05;
+                    adjustedProb[streakAnalysis.color] -= 0.05;
+                }
+                
+                // 根據最近6局的趨勢調整機率
+                const recentBlue = recentGames.filter(c => c === 'blue').length;
+                const recentRed = recentGames.filter(c => c === 'red').length;
+                if (recentBlue >= 4) {
+                    adjustedProb.red += 0.03;
+                    adjustedProb.blue -= 0.03;
+                } else if (recentRed >= 4) {
+                    adjustedProb.blue += 0.03;
+                    adjustedProb.red -= 0.03;
+                }
+
+                // 生成隨機數並根據調整後的機率選擇結果
+                const random = Math.random();
+                if (random < adjustedProb.blue) {
+                    results.blue++;
+                } else if (random < adjustedProb.blue + adjustedProb.red) {
+                    results.red++;
+                } else {
+                    results.green++;
+                }
+            }
+
+            return results;
+        }
+
+        // 分析連續出現的情況
+        function analyzeStreak(history) {
+            if (history.length === 0) return { streak: 0, color: null };
+            
+            let streak = 1;
+            let color = history[history.length - 1];
+            
+            for (let i = history.length - 2; i >= 0; i--) {
+                if (history[i] === color) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            return { streak, color };
+        }
+
+        function selectColor(color) {
+            if (rounds >= MAX_ROUNDS) {
+                alert('遊戲已結束！請重置開始新遊戲。');
+                return;
+            }
+
+            history.push(color);
+            rounds++;
+            updateStats();
+
+            if (rounds >= MAX_ROUNDS) {
+                alert('遊戲結束！');
+            }
+        }
+
+        function deleteLastRecord() {
+            if (history.length > 0) {
+                history.pop();
+                rounds--;
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('rounds').textContent = rounds;
+            
+            // 預測邏輯
+            let prediction = '';
+            if (rounds === 0) {
+                prediction = '請選擇 莊/閒';
+            } else {
+                // 使用蒙地卡羅模擬
+                const simResults = monteCarloSimulation(history);
+                
+                // 直接給出建議，不顯示機率
+                if (simResults.blue > simResults.red && simResults.blue > simResults.green) {
+                    prediction = '閒';
+                } else if (simResults.red > simResults.blue && simResults.red > simResults.green) {
+                    prediction = '莊';
+                } else if (simResults.green > simResults.blue && simResults.green > simResults.red) {
+                    prediction = '和';
+                } else {
+                    prediction = '觀望';
+                }
+            }
+            
+            document.getElementById('prediction').innerHTML = prediction;
+
+            const historyDisplay = document.getElementById('history-display');
+            historyDisplay.innerHTML = '';
+            
+            for (let i = 0; i < 60; i++) {
+                const cell = document.createElement('div');
+                const column = Math.floor(i / 6);
+                const row = i % 6;
+                
+                cell.style.gridRow = (row + 1).toString();
+                cell.style.gridColumn = (column + 1).toString();
+                
+                if (i < history.length) {
+                    cell.className = `history-dot ${history[i]}`;
+                } else {
+                    cell.className = 'history-cell';
+                }
+                historyDisplay.appendChild(cell);
+            }
+        }
+
+        function resetGame() {
+            history = [];
+            rounds = 0;
+            updateStats();
+        }
+
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width/fontSize;
+
+        const rainDrops = Array(Math.floor(columns)).fill(1);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+
+                if(rainDrops[i]*fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        setInterval(draw, 30);
+
+        // 註冊 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+               navigator.serviceWorker.register('/iii6666_333/sw.js')
+                 .then(registration => {
+                console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+}
+
+        // 初始化遊戲
+        updateStats();
+    </script>
+</body>
+</html>

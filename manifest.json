@@ -1,0 +1,24 @@
+{
+    "name": "小算盤",
+    "short_name": "AI算牌系統",
+    "description": "百家樂計算機",
+    "start_url": "/iii6666_333/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#00ff00",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/iii6666_333/icons/mm1.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/iii6666_333/icons/mm2.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
